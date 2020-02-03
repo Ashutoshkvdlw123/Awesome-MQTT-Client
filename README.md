@@ -8,14 +8,14 @@ desktop notifier widgets, etc.
 
 **Note:**The project is in development, therefore you cannot do much with it as of now. But I am trying to make it usable.
 
-##Installation
+## Installation
 ---
 It is recommended that you use a virtual environment with Python 3 already installed for the setup.
 To install the project, just clone the content onto your machine.
 In the project directory, open up a terminal window, now run `python3 setup.py` or `python setup.py`.
 After that, it will install some dependencies based on either you have Linux or Windows.
 
-####Screenshots
+#### Screenshots
 ---
 <img src="screenshots/shot-1.png"
      alt="Markdown Monster icon"
