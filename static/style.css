@@ -1,3 +1,25 @@
+ @font-face {
+          font-family:"zmx";
+          src: url("fonts/Zhi_Mang_Xing/ZhiMangXing-Regular.ttf") format("truetype");
+    }
+@font-face {
+          font-family:"Orbitron";
+          src: url("fonts/Orbitron/Orbitron-VariableFont:wght.ttf") format("truetype");
+    }
+@font-face {
+          font-family:"pacifico";
+          src: url("fonts/Pacifico/Pacifico-Regular.ttf") format("truetype");
+    }
+@font-face {
+          font-family:"molle";
+          src: url("fonts/Molle/molleItalic.ttf") format("truetype");
+    }
+@font-face {
+          font-family:"bangers";
+          src: url("fonts/Bangers/BangersRegular.ttf") format("truetype");
+    }
+
+
 body {
     background: #2C2F33;
     color: white;
@@ -7,6 +29,16 @@ body {
     background: url('/imgs/background-1.jpg');
     color: white;
     text-align: center;
+}
+
+.jumbotron-enhanced h3 {
+    font-size: 30px;
+    font-family: "bangers";
+}
+
+.jumbotron-enhanced small {
+    font-size: 15px;
+    font-family: "pacifico";
 }
 
 .add-widget {
