@@ -1,0 +1,4 @@
+app.db
+__pycache__
+mqtt-client
+

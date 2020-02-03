@@ -1,0 +1,22 @@
+body {
+    background: #2C2F33;
+    color: white;
+}
+
+.jumbotron-enhanced {
+    background: url('/imgs/background-1.jpg');
+    color: white;
+    text-align: center;
+}
+
+.add-widget {
+    text-align: left;
+}
+
+hr, .empty-placeholder {
+    color: #5d605d;
+}
+
+.modal {
+    color: black;
+}
