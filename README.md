@@ -18,14 +18,14 @@ After that, it will install some dependencies based on either you have Linux or 
 #### Screenshots
 ---
 <img src="screenshots/shot-1.png"
-     alt="Markdown Monster icon"
+     alt="screen shot 1"
      width="800px"
      style="float: left; margin: 10px 30px 30px 10px;" />
 <img src="screenshots/shot-2.png"
-     alt="Markdown Monster icon"
+     alt="screenshot 2"
      width="800px"
      style="float: left; margin: 10px 30px 30px 10px;" />
 <img src="screenshots/shot-3.png"
-     alt="Markdown Monster icon"
+     alt="screenshot 3"
      width="800px"
      style="float: left; margin: 10px 30px 30px 10px;" />
