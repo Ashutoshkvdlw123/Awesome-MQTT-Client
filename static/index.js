@@ -69,26 +69,35 @@ class Widget {
 class SysWidPer{
     constructor(Wid){
         this.name = Wid.name;
+        this.alias = Math.random().toString(36).slice(2);
+        this.elem = document.getElementById(this.alias_name);
         this.msg = Wid.msg;
         this.topic = Wid.topic;
         this.broker = Wid.broker;
-        this.widTag = "<div class=''>\
-                            <div class='btn-group row' role='group' aria-label='Basic example' style='margin:10px 20px 10px 20px;'>\
+        //this html code block shows a widget from python side
+        this.widTag = "<div id='{5}'>\
+                            <div class='btn-group row {0}' role='group' aria-label='Basic example' style='margin:10px 20px 10px 20px;'>\
                                 <button class='btn btn-success'><i class='fa fa-circle-o'></i></button>\
-                                <button class='btn btn-primary'>{0}</button>\
+                                <button class='btn btn-primary'>{3}</button>\
                                 <button class='btn btn-primary'><i class='fa fa-snowflake-o'> {1}</i></button>\
                                 <button class='btn btn-primary'><i class='fa fa-envelope'></i> {2}</button>\
-                                <button class='btn btn-secondary delete-{3}'>\
+                                <button class='btn btn-secondary delete-{4}'>\
                                     <i class='fa fa-trash'></i>\
                                 </button>\
                             </div>\
-                        </div>"//this html code block shows a widget from python side
-                        .replace("{0}", this.name).replace("{1}", this.broker).
-                        replace("{2}", this.msg).replace("{3}", this.name);
-    }
-    display(){
+                        </div>".replace("{0}", this.alias).replace("{1}", this.broker).
+                        replace("{2}", this.msg).replace("{3}", this.name).replace("{4}", this.alias)
+                        .replace("{5}", this.alias);
+    }display(){
         $("span").remove(".empty-placeholder");
         $(".widgets-area").append(this.widTag);
+
+    }delete_on_trash_click(name){
+        $(".delete-"+this.alias).click(function(e){
+            console.log(this.name);
+            eel.delete_widget(name, "per");
+            window.location.reload(true);
+        });
     }
 }
 
@@ -97,21 +106,36 @@ per_wids = eel.load_widgets("per")(function(pw){
     for(var i = 0; i < pw.length; i++){
         wid = new SysWidPer(pw[i]);
         console.log(wid.widTag);
+        console.log(wid.name)
         wid.display();
+        wid.delete_on_trash_click(wid.name);
     }
 });
 
 var newWid;
+var inputs = ["#widget-type", "#widget-name", "#widget-topic", "#widget-broker", "#widget-msg"];
 
 //gets triggered when new widgets are created
 function create_widget() {
-    console.log("Adding widget...")
-    var typeWid = $("#widget-type").val();
-    var nameWid = $("#widget-name").val();
-    var topicWid = $("#widget-topic").val();
-    var brokerWid = $("#widget-broker").val();
-    var msgWid = $("#widget-msg").val();
+    vals = [];
+    console.log("Adding widget...");
+    for(i = 0; i < inputs.length; i++){
+        var val = $(inputs[i]).val();
+        if (val.length > 1){
+            vals.push(val);
+        }else{
+            $("#add-widget-modal").modal("hide");
+            spawnAlert("warning", "Something is wrong with your info! Please try again.")
+            return
+        }
+    }
+    var typeWid = vals[0];
+    var nameWid = vals[1];
+    var topicWid = vals[2];
+    var brokerWid = vals[3];
+    var msgWid = vals[4];
 
+    console.log("Adding Widget!");
     var newWid = new Widget(typeWid, nameWid, topicWid, brokerWid, msgWid);
     newWid.add();
 }
