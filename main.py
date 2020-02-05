@@ -110,10 +110,11 @@ def load_widgets(wid_type):
         res = c.fetchall()
     for wid in res:
         d = {
-            "name": f"{wid[0]}",
-            "broker": f"{wid[1]}",
-            "topic": f"{wid[2]}",
-            "msg": f"{wid[3]}",
+            "type": wid_type,
+            "name": wid[0],
+            "broker": wid[1],
+            "topic": wid[2],
+            "msg": wid[3],
         }
         data.append(d.copy())
     return data

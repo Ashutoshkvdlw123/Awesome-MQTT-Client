@@ -9,7 +9,7 @@ function set_broker(b) {
 //spawns an alert msg
 function spawnAlert(type, alertMsg){
     alert_class = "alert alert-{} alert-dismissible fade show".replace("{}", type)
-    alert = "<div class='{0}'>{1}<button type='button' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>"
+    alert = "<div class='{0}'>{1}<a class='close' data-dismiss='alert'>&times;</a></div>"
     .replace("{0}", alert_class)
     .replace("{1}", alertMsg);
     console.log(alert_class)
@@ -65,7 +65,7 @@ class Widget {
     }
 }
 
-//Class for loading permanent widget from python side
+//Class for loading widgets from python side
 class SysWidPer{
     constructor(Wid){
         this.name = Wid.name;
@@ -74,8 +74,10 @@ class SysWidPer{
         this.msg = Wid.msg;
         this.topic = Wid.topic;
         this.broker = Wid.broker;
+        this.type = Wid.type
         //this html code block shows a widget from python side
-        this.widTag = "<div id='{5}'>\
+        if (this.type == "per"){
+            this.widTag = "<div id='{5}'>\
                             <div class='btn-group row {0}' role='group' aria-label='Basic example' style='margin:10px 20px 10px 20px;'>\
                                 <button class='btn btn-success'><i class='fa fa-circle-o'></i></button>\
                                 <button class='btn btn-primary'>{3}</button>\
@@ -88,6 +90,22 @@ class SysWidPer{
                         </div>".replace("{0}", this.alias).replace("{1}", this.broker).
                         replace("{2}", this.msg).replace("{3}", this.name).replace("{4}", this.alias)
                         .replace("{5}", this.alias);
+        }else{
+            this.widTag = "<div id='{5}'>\
+                            <div class='btn-group row {0}' role='group' aria-label='Basic example' style='margin:10px 20px 10px 20px;'>\
+                                <button class='btn btn-success'><i class='fa fa-circle'></i></button>\
+                                <button class='btn btn-primary'>{3}</button>\
+                                <button class='btn btn-primary'><i class='fa fa-snowflake-o'> {1}</i></button>\
+                                <button class='btn btn-primary'><i class='fa fa-envelope'></i> {2}</button>\
+                                <button class='btn btn-secondary delete-{4}'>\
+                                    <i class='fa fa-trash'></i>\
+                                </button>\
+                            </div>\
+                        </div>".replace("{0}", this.alias).replace("{1}", this.broker).
+                        replace("{2}", this.msg).replace("{3}", this.name).replace("{4}", this.alias)
+                        .replace("{5}", this.alias);
+        }
+
     }display(){
         $("span").remove(".empty-placeholder");
         $(".widgets-area").append(this.widTag);
@@ -103,6 +121,16 @@ class SysWidPer{
 
 //loads all permanent widgets from python
 per_wids = eel.load_widgets("per")(function(pw){
+    for(var i = 0; i < pw.length; i++){
+        wid = new SysWidPer(pw[i]);
+        console.log(wid.widTag);
+        console.log(wid.name)
+        wid.display();
+        wid.delete_on_trash_click(wid.name);
+    }
+});
+
+per_wids = eel.load_widgets("temp")(function(pw){
     for(var i = 0; i < pw.length; i++){
         wid = new SysWidPer(pw[i]);
         console.log(wid.widTag);
@@ -139,3 +167,13 @@ function create_widget() {
     var newWid = new Widget(typeWid, nameWid, topicWid, brokerWid, msgWid);
     newWid.add();
 }
+
+function keyPress(e){
+    console.log("modal triggered!");
+    e = e || window.event;
+    if ((e.which == 71 || e.keyCode == 71) && e.ctrlKey){
+        $("#add-widget-modal").modal("show");
+    }
+}
+
+$("body").keydown(keyPress);
