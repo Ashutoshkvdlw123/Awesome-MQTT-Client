@@ -3,6 +3,7 @@ import platform
 import os
 import sqlite3
 import json
+import datetime
 import paho.mqtt as mqtt
 
 current_os = platform.system()
@@ -20,8 +21,7 @@ with conn_temp:
     c_temp.execute("""
                 CREATE TABLE widgets (name TEXT,
                                       broker TEXT,
-                                      topic TEXT,
-                                      value TEXT);
+                                      topic TEXT);
                """)
 
 # directories
@@ -77,10 +77,10 @@ def add_widget(wid_type, name, msg, topic, broker):
         print("Adding widget!")
         if wid_type == "temp":
             with conn_temp:
-                c_temp.execute("INSERT INTO widgets VALUES (:name, :broker, :topic, :msg);", {"name": name, "msg": msg, "broker": broker, "topic": topic})
+                c_temp.execute("INSERT INTO widgets VALUES (:name, :broker, :topic);", {"name": name, "broker": broker, "topic": topic})
         else:
             with conn:
-                c.execute("INSERT INTO widgets VALUES (:name, :broker, :topic, :msg);", {"name": name, "msg": msg, "broker": broker, "topic": topic})
+                c.execute("INSERT INTO widgets VALUES (:name, :broker, :topic);", {"name": name, "broker": broker, "topic": topic})
         return "1"
 
 # for deleting a widget from db
@@ -113,8 +113,7 @@ def load_widgets(wid_type):
             "type": wid_type,
             "name": wid[0],
             "broker": wid[1],
-            "topic": wid[2],
-            "msg": wid[3],
+            "topic": wid[2]
         }
         data.append(d.copy())
     return data

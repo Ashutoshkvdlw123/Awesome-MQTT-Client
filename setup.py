@@ -31,8 +31,7 @@ create_table_settings = """
 create_table_widgets = """
                 CREATE TABLE widgets (name TEXT,
                                       broker TEXT,
-                                      topic TEXT,
-                                      msg TEXT);
+                                      topic TEXT);
                """
 
 if __name__ == "__main__":
