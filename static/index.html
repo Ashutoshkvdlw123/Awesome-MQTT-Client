@@ -15,7 +15,7 @@
         <small>The MQTT Client you need!</small>
     </div>
 
-    <div class="container">
+<div class="container">
         <div class="alerts">
         </div>
         <div class="widgets-area column">
@@ -27,7 +27,62 @@
         <div class="btn btn-block btn-lg btn-success add-widget" data-toggle="modal" data-target="#add-widget-modal">
             <i class="fa fa-plus"></i> Add Widget
         </div>
+
+    <div class="modal fade show" id="widgetInfoModal" tabindex="-1" role="dialog"
+      aria-labelledby="widgetInfoModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Widget - {widget_name}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <form class="widgetInfo-form">
+                        <div class="form-group">
+                            <label>Publisher</label>
+                            <select class="publisher-choice">
+                                <option>OFF</option>
+                                <option>ON</option>
+                            </select>
+                            <div class="form-group pub-type-group">
+                                <label>Type</label>
+                                <select class="pub-type">
+                                    <option>Message</option>
+                                    <option>Input</option>
+                                </select>
+                                <div class="form-group">
+                                    <label>Message</label>
+                                    <input type="text" name="pub-msg" class="pub-msg">
+                                </div>
+                                <div class="form-group">
+                                    <label>Input-Type</label>
+                                    <select class="pub-input-type">
+                                        <option>Speech Recogniton</option>
+                                        <option>Custom Message</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Subscriber</label>
+                            <select class="subscriber-choice">
+                                <option>OFF</option>
+                                <option>ON</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
     </div>
+
+
+
 
     <div class="modal fade" id="add-widget-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
       <div class="modal-dialog" role="document">
@@ -59,14 +114,19 @@
                     <label>Broker</label>
                     <input type="text" name="broker" id="widget-broker" class="form-control" required>
                 </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-outline-primary" id="add-widget-btn" onclick="create_widget()">Add</button>
-          </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-outline-primary" id="add-widget-btn" onclick="create_widget()">Add</button>
+                  </div>
+            </form>
         </div>
-      </div>
     </div>
+</div>
+</div>
+</div>
+
+
+</div>
     <!--jquery-->
     <script type="text/javascript" src="/jquery-3.4.1.js"></script>
 
@@ -76,6 +136,8 @@
     <!-- eel.js is a javascript file being served at "/eel.js" becuase by python-eel package-->
     <script type="text/javascript" src="/eel.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/6.6.0/math.js"></script>
+    <!--Paho javascript library-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
     <!-- index.js is the js file for the project -->
     <script type="text/javascript" src="/index.js"></script>
 </body>

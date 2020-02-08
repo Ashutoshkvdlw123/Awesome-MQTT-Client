@@ -77,35 +77,50 @@ class SysWidPer{
         //this html code block shows a widget from python side
         if (this.type == "per"){
             this.widTag = "<div id='{5}'>\
-                            <div class='btn-group row {0}' role='group' aria-label='Basic example' style='margin:10px 20px 10px 20px;'>\
+                            <div class='btn-group row' role='group' aria-label='Basic example' style='margin:10px 20px 10px 20px;'>\
                                 <button class='btn btn-success'><i class='fa fa-circle-o'></i></button>\
-                                <button class='btn btn-primary'>{3}</button>\
+                                <button class='btn btn-primary {0}'>{3}</button>\
                                 <button class='btn btn-primary'><i class='fa fa-snowflake-o'> {1}</i></button>\
                                 <button class='btn btn-secondary delete-{4}'>\
                                     <i class='fa fa-trash'></i>\
                                 </button>\
                             </div>\
-                        </div>".replace("{0}", this.alias).replace("{1}", this.broker).
-                        replace("{2}", this.msg).replace("{3}", this.name).replace("{4}", this.alias)
+                        </div>".replace("{0}", this.alias)
+                        .replace("{1}", this.broker)
+                        .replace("{3}", this.name)
+                        .replace("{4}", this.alias)
                         .replace("{5}", this.alias);
         }else{
             this.widTag = "<div id='{5}'>\
-                            <div class='btn-group row {0}' role='group' aria-label='Basic example' style='margin:10px 20px 10px 20px;'>\
+                            <div class='btn-group row' role='group' aria-label='Basic example' style='margin:10px 20px 10px 20px;'>\
                                 <button class='btn btn-success'><i class='fa fa-circle'></i></button>\
-                                <button class='btn btn-primary'>{3}</button>\
+                                <button class='btn btn-primary {0}'>{3}</button>\
                                 <button class='btn btn-primary'><i class='fa fa-snowflake-o'> {1}</i></button>\
                                 <button class='btn btn-secondary delete-{4}'>\
                                     <i class='fa fa-trash'></i>\
                                 </button>\
                             </div>\
-                        </div>".replace("{0}", this.alias).replace("{1}", this.broker).
-                        replace("{3}", this.name).replace("{4}", this.alias)
+                        </div>".replace("{0}", this.alias)
+                        .replace("{1}", this.broker)
+                        .replace("{3}", this.name)
+                        .replace("{4}", this.alias)
                         .replace("{5}", this.alias);
         }
 
-    }display(){
+    }display(name){
         $("span").remove(".empty-placeholder");
         $(".widgets-area").append(this.widTag);
+        var raw_title = $("#widgetInfoModal .modal-title").html();
+        $("."+this.alias).click(function(){
+            var new_title = raw_title.replace("{widget_name}", name);
+            $("#widgetInfoModal .modal-title").html(new_title);
+            $("#widgetInfoModal").modal("show");
+        });
+        $("#widgetInfoModal .publisher-choice").on("change", function(e){
+                if ($("#widgetInfoModal .publisher-choice") == "ON"){
+
+                }
+        });
 
     }delete_on_trash_click(name){
         $(".delete-"+this.alias).click(function(e){
@@ -122,7 +137,7 @@ per_wids = eel.load_widgets("per")(function(pw){
         wid = new SysWidPer(pw[i]);
         console.log(wid.widTag);
         console.log(wid.name);
-        wid.display();
+        wid.display(wid.name);
         wid.delete_on_trash_click(wid.name);
     }
 });
@@ -132,7 +147,7 @@ temp_wids = eel.load_widgets("temp")(function(pw){
         wid2 = new SysWidPer(pw[i]);
         console.log(wid2.widTag);
         console.log(wid2.name);
-        wid2.display();
+        wid2.display(wid2.name);
         wid2.delete_on_trash_click(wid2.name);
     }
 });
@@ -159,9 +174,11 @@ function create_widget() {
     var topicWid = vals[2];
     var brokerWid = vals[3];
 
-    if (nameWid.length > 10){
+    var char_limit = 30;
+
+    if (nameWid.length > char_limit){
         $("#add-widget-modal").modal("hide");
-        spawnAlert("warning", "Your widget name exceeds the name limit of 10 characters.");
+        spawnAlert("warning", "Your widget name exceeds the name limit of {} characters.".replace("{}", char_limit));
         return
     }else{
         console.log("Adding Widget!");
@@ -174,8 +191,7 @@ function keyPress(e){
     console.log("modal triggered!");
     e = e || window.event;
     if ((e.which == 71 || e.keyCode == 71) && e.ctrlKey){
-        //$("#add-widget-modal").modal("show");
-
+        $("#add-widget-modal").modal("show");
     }
 }
 

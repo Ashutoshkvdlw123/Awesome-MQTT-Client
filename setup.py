@@ -37,7 +37,10 @@ create_table_widgets = """
 if __name__ == "__main__":
   if current_os.lower() == "windows":
     print("Installing win10toast...")
-    os.system("python3 -m pip install win10toast")
+    try:
+      os.system("python3 -m pip install win10toast")
+    except:
+      os.system("python -m pip install win10toast")
     print("win10toast installed!")
 
   elif current_os.lower() == "linux":
@@ -46,7 +49,11 @@ if __name__ == "__main__":
     print("pgi installed!")
 
   print("Installing other requirements from requirements.txt")
-  os.system("python3 -m pip install -r requirements.txt")
+  try:
+    os.system("python3 -m pip install -r requirements.txt")
+  except:
+    os.system("python -m pip install -r requirements.txt")
+
   print("Done installing requirements.!")
 
   print("Setting up database...")
