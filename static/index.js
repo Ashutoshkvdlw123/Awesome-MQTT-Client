@@ -69,6 +69,7 @@ class Widget {
 class SysWidPer{
     constructor(Wid){
         this.name = Wid.name;
+        this.id = Wid.id;
         this.alias = Math.random().toString(36).slice(2);
         this.elem = document.getElementById(this.alias_name);
         this.topic = Wid.topic;
@@ -110,16 +111,29 @@ class SysWidPer{
     }display(name){
         $("span").remove(".empty-placeholder");
         $(".widgets-area").append(this.widTag);
+        $(".pub-type-group").hide();
         var raw_title = $("#widgetInfoModal .modal-title").html();
         $("."+this.alias).click(function(){
             var new_title = raw_title.replace("{widget_name}", name);
             $("#widgetInfoModal .modal-title").html(new_title);
             $("#widgetInfoModal").modal("show");
         });
-        $("#widgetInfoModal .publisher-choice").on("change", function(e){
-                if ($("#widgetInfoModal .publisher-choice") == "ON"){
-
-                }
+        $(".pub-choice").change(function(){
+            if ($(".pub-choice").val() == "ON"){
+                $(".pub-type-group").show();
+            }if ($(".pub-choice").val() == "OFF"){
+                $(".pub-type-group").hide();
+            }
+        });
+        $(".pub-input-group").hide();
+        $(".pub-type").change(function(){
+            if ($(".pub-type").val() == "Message"){
+                $(".pub-input-group").hide();
+                $(".pub-msg-group").show();
+            }if ($(".pub-type").val() == "Input"){
+                $(".pub-input-group").show();
+                $(".pub-msg-group").hide();
+            }
         });
 
     }delete_on_trash_click(name){
@@ -127,6 +141,16 @@ class SysWidPer{
             console.log(name);
             eel.delete_widget(name, this.type)
             window.location.reload();
+        });
+    }add_pubsub(name){
+        $(".save-pubsub").click(function(){
+            if ($(".pub-choice").val() == "ON"){
+                if ($(".pub-type").val() == "Message"){
+                    eel.create_pub(this.type, this.id, "Message", $(".pub-msg").val(), 0);
+                }if ($(".pub-type").val() == "Input"){
+                    eel.create_pub(this.type, this.id, "Input", 0, $(".pub-input-type").val());
+                }
+            }
         });
     }
 }
@@ -139,6 +163,7 @@ per_wids = eel.load_widgets("per")(function(pw){
         console.log(wid.name);
         wid.display(wid.name);
         wid.delete_on_trash_click(wid.name);
+        wid.add_pubsub(wid.name);
     }
 });
 
@@ -149,6 +174,7 @@ temp_wids = eel.load_widgets("temp")(function(pw){
         console.log(wid2.name);
         wid2.display(wid2.name);
         wid2.delete_on_trash_click(wid2.name);
+        wid2.add_pubsub(wid2.name);
     }
 });
 

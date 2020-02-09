@@ -20,18 +20,46 @@ class Setting(object):
 
   def set(self):
     with conn:
-      c.execute("INSERT INTO settings VALUES (:name, :value);", {'name': self.name, 'value': self.value})
+      c.execute("INSERT INTO settings (name, value) VALUES (:name, :value);", {'name': self.name, 'value': self.value})
 
 
 create_table_settings = """
-                CREATE TABLE settings (name TEXT,
-                                       value TEXT);
+                CREATE TABLE settings (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                      name TEXT,
+                                      value TEXT);
                """
 
 create_table_widgets = """
-                CREATE TABLE widgets (name TEXT,
+                CREATE TABLE widgets (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                      name TEXT,
                                       broker TEXT,
                                       topic TEXT);
+               """
+
+create_table_wid_choices = """
+                CREATE TABLE wid_choices (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                          wid_id INTEGER,
+                                          sub BOOLEAN,
+                                          pub BOOLEAN,
+                                          FOREIGN KEY(wid_id) REFERENCES widgets(id));
+               """
+create_table_pub_vals = """
+                CREATE TABLE pub_vals (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                          wid_id INTEGER,
+                                          wid_choices_id INTEGER,
+                                          type TEXT,
+                                          msg TEXT,
+                                          input_type TEXT,
+                                          FOREIGN KEY(wid_id) REFERENCES widgets(id),
+                                          FOREIGN KEY(wid_choices_id) REFERENCES wid_choices(id));
+               """
+create_table_sub_vals = """
+                CREATE TABLE sub_vals (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                          wid_id INTEGER,
+                                          wid_choices_id INTEGER,
+                                          type TEXT,
+                                          FOREIGN KEY(wid_id) REFERENCES widgets(id),
+                                          FOREIGN KEY(wid_choices_id) REFERENCES wid_choices(id));
                """
 
 if __name__ == "__main__":
@@ -60,6 +88,9 @@ if __name__ == "__main__":
   with conn:
     c.execute(create_table_settings)
     c.execute(create_table_widgets)
+    c.execute(create_table_wid_choices)
+    c.execute(create_table_pub_vals)
+    c.execute(create_table_sub_vals)
   date_installed = Setting("date-installed", now)
   default_broker = Setting("default-broker", "broker.mqttdashboard.com")
   port = Setting("port", "1883")
