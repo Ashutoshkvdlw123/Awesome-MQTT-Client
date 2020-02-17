@@ -114,36 +114,29 @@ class SysWidPer{
                         .replace("{5}", this.alias);
         }
 
-    }display(name, sub_type){
+    }display(name, sub_type, topic, broker){
         $("span").remove(".empty-placeholder");
         $(".widgets-area").append(this.widTag.replace("{2}", sub_type));
 
         $("."+this.alias).click(function(){
-
+            $("#modal-name-pubsub").html(name);
             if(sub_type == "Publisher"){
                 var raw_title = $("#modal-title-pubsub").html();
-                console.log(raw_title);
-                var new_title = raw_title.replace("{widget_name}", name);
-                $("#modal-title-pubsub").html(new_title);
-                console.log(this.sub_type);
-                console.log(this.name);
+                console.log(this.broker);
+                console.log(this.topic);
                 this.pub_msg = eel.get_pubsub(this.type, this.id, "pub_vals");
-                $("#widgetInfoModal-pub #broker-setting-pub").val(this.broker);
-                $("#widgetInfoModal-pub #broker-setting-pub").val(this.topic);
-                $("#widgetInfoModal-pub #msg-pub").val(this.pub_msg);
+                $("#broker-setting-pub").val(broker);
+                $("#topic-setting-pub").val(topic);
+                //$("#msg-pub").val(pub_msg);
                 $("#widgetInfoModal-pub").modal("show");
 
             }if(sub_type == "Subscriber"){
-                var raw_title = $("#modal-title-pubsub").html();
-                console.log(raw_title);
-                var new_title = raw_title.replace("{widget_name}", name);
-                $("#modal-title-pubsub").html(new_title);
                 console.log(this.sub_type);
                 console.log(this.name);
                 this.type_notify = eel.get_pubsub(this.type, this.id, "sub_vals");
-                $("#widgetInfoModal-sub #broker-setting-sub").val(this.broker);
-                $("#widgetInfoModal-sub #broker-setting-sub").val(this.topic);
-                $("#widgetInfoModal-sub #notify-type").val(this.type_notify);
+                $("#broker-setting-sub").val(this.broker);
+                $("#topic-setting-sub").val(this.topic);
+                $("#notify-type").val(this.type_notify);
                 $("#widgetInfoModal-sub").modal("show");
             }
 
@@ -164,7 +157,7 @@ per_wids = eel.load_widgets("per")(function(pw){
     for(var i = 0; i < pw.length; i++){
         wids[i] = new SysWidPer(pw[i], pw[i].name, pw[i].sub_type);
         console.log(wids[i]);
-        wids[i].display(wids[i].name, wids[i].sub_type);
+        wids[i].display(wids[i].name, wids[i].sub_type, wids[i].topic, wids[i].broker);
         wids[i].delete_on_trash_click(wids[i].name);
     }
 });
@@ -175,7 +168,7 @@ temp_wids = eel.load_widgets("temp")(function(pw){
         wids2[i] = new SysWidPer(pw[i]);
         console.log(wids2[i].widTag);
         console.log(wids2[i].name);
-        wids2[i].display(wids2[i].name, wids2[i].sub_type);
+        wids2[i].display(wids2[i].name, wids2[i].sub_type, wids2[i].topic, wids2[i].broker);
         wids2[i].delete_on_trash_click(wids2[i].name);
     }
 });

@@ -2,8 +2,6 @@ import eel
 import platform
 import os
 import sqlite3
-import json
-import datetime
 import paho.mqtt as mqtt
 
 current_os = platform.system()
