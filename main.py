@@ -16,15 +16,35 @@ c = conn.cursor()
 conn_temp = sqlite3.connect(":memory:")
 c_temp = conn_temp.cursor()
 
-# create table in RAM database
-with conn_temp:
-    c_temp.execute("""
-                CREATE TABLE widgets (name TEXT,
+create_table_widgets = """
+                CREATE TABLE widgets (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                      name TEXT,
+                                      sub_type TEXT,
                                       broker TEXT,
                                       topic TEXT);
-               """)
+               """
 
-# directories
+create_table_pub_vals = """
+                CREATE TABLE pub_vals (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                          wid_id INTEGER,
+                                          msg TEXT,
+                                          FOREIGN KEY(wid_id) REFERENCES widgets(id));
+               """
+create_table_sub_vals = """
+                CREATE TABLE sub_vals (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                          wid_id INTEGER,
+                                          type_notify TEXT,
+                                          FOREIGN KEY(wid_id) REFERENCES widgets(id));
+               """
+
+# create table in RAM database
+with conn_temp:
+    c_temp.execute(create_table_widgets)
+    c_temp.execute(create_table_pub_vals)
+    c_temp.execute(create_table_sub_vals)
+
+
+# directories' path
 cwd = os.getcwd()
 static_dir = os.path.join(cwd, "static")
 img_dir = os.path.join(static_dir, "imgs")
@@ -32,7 +52,7 @@ img_dir = os.path.join(static_dir, "imgs")
 # imgs
 jarvis_icon = os.path.join(img_dir, "jarvis-png-3.png")
 
-# for updating a setting in app.db
+# updates an entry in the "settings" table
 
 
 @eel.expose
@@ -40,7 +60,7 @@ def update_setting(name, value):
     with conn:
         c.execute("UPDATE settings SET name=:name AND value=:value;", {"name": name, "value": value})
 
-# returns a setting from db
+# returns a list of settings from "settings" table using te "name" parameter
 
 
 @eel.expose
@@ -50,7 +70,7 @@ def get_setting(name):
     print(setting)
     return setting
 
-# returns a widget from db
+# returns a list of widgets from "widgets" table using the "name" parameter
 
 
 @eel.expose
@@ -64,11 +84,12 @@ def get_widget(name, wid_type):
         c.execute("SELECT * FROM widgets WHERE name=?;", (name,))
         return c.fetchall()
 
-# adds widget by modifying the db
+# adds an entry to "widgets" table
 
 
 @eel.expose
-def add_widget(wid_type, name, msg, topic, broker):
+def add_widget(wid_type, sub_type, name, topic, broker):
+    print(sub_type)
     exist = get_widget(name=name, wid_type=wid_type)
     print(exist)
     if exist:
@@ -77,17 +98,15 @@ def add_widget(wid_type, name, msg, topic, broker):
         print("Adding widget!")
         if wid_type == "temp":
             with conn_temp:
-                c_temp.execute("INSERT INTO widgets (name, broker,topic) VALUES (:name, :broker, :topic);", {"name": name, "broker": broker, "topic": topic})
-                last_id = c_temp.lastrowid
-                c_temp.execute("INSERT INTO wid_choices (wid_id, pub, sub) VALUES (:wid_id, :pub, :sub);", {"wid_id": last_id, "pub": 0, "sub": 0})
+                c_temp.execute("INSERT INTO widgets (name, sub_type, broker, topic) VALUES (:name, :sub_type, :broker, :topic);",
+                               {"name": name, "broker": broker, "topic": topic, "sub_type": sub_type})
         else:
             with conn:
-                c.execute("INSERT INTO widgets (name, broker,topic) VALUES (:name, :broker, :topic);", {"name": name, "broker": broker, "topic": topic})
-                last_id = c.lastrowid
-                c.execute("INSERT INTO wid_choices (wid_id, pub, sub) VALUES (:wid_id, :pub, :sub);", {"wid_id": last_id, "pub": 0, "sub": 0})
+                c.execute("INSERT INTO widgets (name, sub_type, broker, topic) VALUES (:name, :sub_type, :broker, :topic);",
+                          {"name": name, 'sub_type': sub_type, "broker": broker, "topic": topic})
         return "1"
 
-# for deleting a widget from db
+# for deleting an entry from the "widgets" table
 
 
 @eel.expose
@@ -100,7 +119,8 @@ def delete_widget(name, wid_type):
         with conn:
             c.execute("DELETE FROM widgets WHERE name=:name;", {"name": name})
 
-# loading all widgets from db in a dictionary format (js-object on js side)
+# loading all widgets from database in a dictionary format form
+# interpreted as a js-object on the js side
 
 
 @eel.expose
@@ -113,15 +133,20 @@ def load_widgets(wid_type):
         c.execute("SELECT * FROM widgets;")
         res = c.fetchall()
     for wid in res:
+        print(wid)
         d = {
             "type": wid_type,
+            "sub_type": wid[2],
             "id": wid[0],
             "name": wid[1],
-            "broker": wid[2],
-            "topic": wid[3]
+            "broker": wid[3],
+            "topic": wid[4]
         }
         data.append(d.copy())
     return data
+
+# returns a publisher or a subscriber from "wid_choices" table in the form of a list of tuples,
+# empty if it does not exist
 
 
 @eel.expose
@@ -129,83 +154,61 @@ def get_pubsub(wid_type, wid_id, table):
     if wid_type == "temp":
         c_temp.execute(f"SELECT * FROM {table} WHERE wid_id=:wid_id;", {"wid_id": wid_id})
         res = c_temp.fetchall()
-        return res
+        print(res)
     else:
         c.execute(f"SELECT * FROM {table} WHERE wid_id=:wid_id;", {"wid_id": wid_id})
         res = c.fetchall()
-        return res
+        print(res)
 
 
+# Changes publisher settings
+# from "pub_vals" table,
+# adds a publisher to it if it does not exist
 @eel.expose
-def toggle_pub(wid_type, wid_id, val=True):
+def update_pub(wid_type, wid_id, msg):
     print("toggling pub!")
-    res = get_pubsub(wid_type, wid_id, "pub_vals")
     if wid_type == "temp":
         with conn_temp:
-            if res:
-                c_temp.execute("UPDATE wid_choices SET pub=:val WHERE wid_id=:wid_id;", {"wid_id": wid_id, "val": val})
-            else:
-                if val:
-                    c_temp.execute("INSERT INTO wid_choices (wid_id, pub, sub) VALUES (:wid_id, :pub, 0);", {"wid_id": wid_id, "pub": val})
-                else:
-                    return
+            c_temp.execute("UPDATE pub_vals SET msg=:msg WHERE wid_id=:wid_id;", {"wid_id": wid_id, "msg": msg})
     else:
         with conn:
-            if res:
-                c.execute("UPDATE wid_choices SET pub=:val WHERE wid_id=:wid_id", {"wid_id": wid_id, "val": val})
-            else:
-                if val:
-                    c.execute("INSERT INTO wid_choices (wid_id, pub, sub) VALUES (:wid_id, :pub, 0)", {"wid_id": wid_id, "pub": val})
-                else:
-                    return
+            c.execute("UPDATE pub_vals SET msg=:msg WHERE wid_id=:wid_id", {"wid_id": wid_id, "msg": msg})
+
+# Changes subscriber-notification boolean
+# from "sub_vals" table,
+# adds a subscriber to it if it does not exist
 
 
 @eel.expose
-def toggle_sub(wid_type, wid_id, val=True):
-    res = get_pubsub(wid_type, wid_id, "sub_vals")
+def update_sub(wid_type, wid_id, type_notify):
+    print("toggling sub!")
     if wid_type == "temp":
         with conn_temp:
-            if res:
-                c_temp.execute("UPDATE wid_choices SET sub=:val WHERE wid_id=:wid_id", {"wid_id": wid_id, "val": val})
-            else:
-                if val:
-                    c_temp.execute("INSERT INTO wid_choices (wid_id, pub, sub) VALUES (:wid_id, 0, :sub)", {"wid_id": wid_id, "sub": sub})
-                else:
-                    return
+            c_temp.execute("UPDATE sub_vals SET type_notify=:type_notify WHERE wid_id=:wid_id;", {"wid_id": wid_id, "type_notify": type_notify})
     else:
         with conn:
-            if res:
-                c.execute("UPDATE wid_choices SET sub=:val WHERE wid_id=:wid_id", {"wid_id": wid_id, "val": val})
-            else:
-                if val:
-                    c.execute("INSERT INTO wid_choices (wid_id, pub, sub) VALUES (:wid_id, 0,:sub)", {"wid_id": wid_id, "sub": sub})
-                else:
-                    return
+            c.execute("UPDATE sub_vals SET type_notify=:type_notify WHERE wid_id=:wid_id", {"wid_id": wid_id, "type_notify": type_notify})
+
+# adds an entry to "pub_vals" table
 
 
 @eel.expose
-def create_pub(wid_type, wid_id, type, msg, input_type):
-    print("adding pub")
-    toggle_pub(wid_type, wid_id, True)
+def create_pub(wid_type, wid_id, msg):
     if wid_type == "temp":
-        with conn_temp:
-            c_temp.execute("INSERT INTO pub_vals (wid_id, wid_choices_id, type, msg, input_type) VALUES (:wid_id, :wid_choices_id, :type, :msg, :input_type);", {"wid_id": wid_id, "wid_choices_id": wid_id, "type": type, "msg": msg, "input_type": input_type})
+        c_temp.execute("INSERT INTO pub_vals (wid_id, msg) VALUES (:wid_id :msg);", {"wid_id": wid_id, "msg": msg})
     else:
-        with conn:
-            c.execute("INSERT INTO pub_vals (wid_id, wid_choices_id, type, msg, input_type) VALUES (:wid_id, :wid_choices_id, :type, :msg, :input_type);", {"wid_id": wid_id, "wid_choices_id": wid_id, "type": type, "msg": msg, "input_type": input_type})
+        c.execute("INSERT INTO pub_vals (wid_id, msg) VALUES (:wid_id :msg);", {"wid_id": wid_id, "msg": msg})
+
+
+# adds an entry to "sub_vals" table
 
 
 @eel.expose
 def create_sub(wid_type, wid_id, type, msg, input_type):
-    toggle_pub(wid_type, wid_id, True)
     if wid_type == "temp":
-        with conn_temp:
-            c_temp.execute("INSERT INTO sub_vals (wid_id, wid_choices_id, type) VALUES (:wid_id, :wid_choices_id, :type);", {"wid_id": wid_id, "wid_choices_id": wid_id, "type": type, "msg": msg, "input_type": input_type})
+        c_temp.execute("INSERT INTO sub_vals (wid_id, type_notify) VALUES (:wid_id :type_notify);", {"wid_id": wid_id, "type_notify": type_notify})
     else:
-        with conn:
-            c.execute("INSERT INTO sub_vals (wid_id, wid_choices_id, type) VALUES (:wid_id, :wid_choices_id, :type);", {"wid_id": wid_id, "wid_choices_id": wid_id, "type": type, "msg": msg, "input_type": input_type})
-
-
+        c.execute("INSERT INTO sub_vals (wid_id, type_notify) VALUES (:wid_id :type_notify);", {"wid_id": wid_id, "type_notify": type_notify})
 
     # setup app settings from db
 BROKER = get_setting("default-broker")

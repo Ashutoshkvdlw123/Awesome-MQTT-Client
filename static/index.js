@@ -22,18 +22,19 @@ eel.get_setting("default-broker")(set_broker);
 
 //widget class for new widget created by user
 class Widget {
-    constructor(type, name, topic, broker, msg){
+    constructor(type, name, topic, broker, sub_type){
         this.type = type;
         this.name = name;
         this.topic = topic;
         this.broker = broker;
-        this.msg = msg;
+        this.sub_type = sub_type;
+        console.log(this.sub_type);
     }
     add(){
         if(this.type == "permanent"){
             eel.add_widget("per",
+                           this.sub_type,
                            this.name,
-                           this.msg,
                            this.topic,
                            this.broker)(function(s){
                             if (s == "1"){
@@ -48,8 +49,8 @@ class Widget {
 
         }if(this.type == "temporary"){
             eel.add_widget("temp",
+                           this.sub_type,
                            this.name,
-                           this.msg,
                            this.topic,
                            this.broker)(function(s){
                             if (s == "1"){
@@ -75,18 +76,21 @@ class SysWidPer{
         this.topic = Wid.topic;
         this.broker = Wid.broker;
         this.type = Wid.type;
+        this.sub_type = Wid.sub_type;
         //this html code block shows a widget from python side
         if (this.type == "per"){
             this.widTag = "<div id='{5}'>\
                             <div class='btn-group row' role='group' aria-label='Basic example' style='margin:10px 20px 10px 20px;'>\
                                 <button class='btn btn-success'><i class='fa fa-circle-o'></i></button>\
                                 <button class='btn btn-primary {0}'>{3}</button>\
+                                <button class='btn btn-primary'>{2}</button>\
                                 <button class='btn btn-primary'><i class='fa fa-snowflake-o'> {1}</i></button>\
-                                <button class='btn btn-secondary delete-{4}'>\
+                                <button class='btn btn-danger delete-{4}'>\
                                     <i class='fa fa-trash'></i>\
                                 </button>\
                             </div>\
-                        </div>".replace("{0}", this.alias)
+                        </div>"
+                        .replace("{0}", this.alias)
                         .replace("{1}", this.broker)
                         .replace("{3}", this.name)
                         .replace("{4}", this.alias)
@@ -96,44 +100,53 @@ class SysWidPer{
                             <div class='btn-group row' role='group' aria-label='Basic example' style='margin:10px 20px 10px 20px;'>\
                                 <button class='btn btn-success'><i class='fa fa-circle'></i></button>\
                                 <button class='btn btn-primary {0}'>{3}</button>\
+                                <button class='btn btn-primary'>{2}</button>\
                                 <button class='btn btn-primary'><i class='fa fa-snowflake-o'> {1}</i></button>\
-                                <button class='btn btn-secondary delete-{4}'>\
+                                <button class='btn btn-danger delete-{4}'>\
                                     <i class='fa fa-trash'></i>\
                                 </button>\
                             </div>\
-                        </div>".replace("{0}", this.alias)
+                        </div>"
+                        .replace("{0}", this.alias)
                         .replace("{1}", this.broker)
                         .replace("{3}", this.name)
                         .replace("{4}", this.alias)
                         .replace("{5}", this.alias);
         }
 
-    }display(name){
+    }display(name, sub_type){
         $("span").remove(".empty-placeholder");
-        $(".widgets-area").append(this.widTag);
-        $(".pub-type-group").hide();
-        var raw_title = $("#widgetInfoModal .modal-title").html();
+        $(".widgets-area").append(this.widTag.replace("{2}", sub_type));
+
         $("."+this.alias).click(function(){
-            var new_title = raw_title.replace("{widget_name}", name);
-            $("#widgetInfoModal .modal-title").html(new_title);
-            $("#widgetInfoModal").modal("show");
-        });
-        $(".pub-choice").change(function(){
-            if ($(".pub-choice").val() == "ON"){
-                $(".pub-type-group").show();
-            }if ($(".pub-choice").val() == "OFF"){
-                $(".pub-type-group").hide();
+
+            if(sub_type == "Publisher"){
+                var raw_title = $("#modal-title-pubsub").html();
+                console.log(raw_title);
+                var new_title = raw_title.replace("{widget_name}", name);
+                $("#modal-title-pubsub").html(new_title);
+                console.log(this.sub_type);
+                console.log(this.name);
+                this.pub_msg = eel.get_pubsub(this.type, this.id, "pub_vals");
+                $("#widgetInfoModal-pub #broker-setting-pub").val(this.broker);
+                $("#widgetInfoModal-pub #broker-setting-pub").val(this.topic);
+                $("#widgetInfoModal-pub #msg-pub").val(this.pub_msg);
+                $("#widgetInfoModal-pub").modal("show");
+
+            }if(sub_type == "Subscriber"){
+                var raw_title = $("#modal-title-pubsub").html();
+                console.log(raw_title);
+                var new_title = raw_title.replace("{widget_name}", name);
+                $("#modal-title-pubsub").html(new_title);
+                console.log(this.sub_type);
+                console.log(this.name);
+                this.type_notify = eel.get_pubsub(this.type, this.id, "sub_vals");
+                $("#widgetInfoModal-sub #broker-setting-sub").val(this.broker);
+                $("#widgetInfoModal-sub #broker-setting-sub").val(this.topic);
+                $("#widgetInfoModal-sub #notify-type").val(this.type_notify);
+                $("#widgetInfoModal-sub").modal("show");
             }
-        });
-        $(".pub-input-group").hide();
-        $(".pub-type").change(function(){
-            if ($(".pub-type").val() == "Message"){
-                $(".pub-input-group").hide();
-                $(".pub-msg-group").show();
-            }if ($(".pub-type").val() == "Input"){
-                $(".pub-input-group").show();
-                $(".pub-msg-group").hide();
-            }
+
         });
 
     }delete_on_trash_click(name){
@@ -142,51 +155,39 @@ class SysWidPer{
             eel.delete_widget(name, this.type)
             window.location.reload();
         });
-    }add_pubsub(name){
-        $(".save-pubsub").click(function(){
-            if ($(".pub-choice").val() == "ON"){
-                if ($(".pub-type").val() == "Message"){
-                    eel.create_pub(this.type, this.id, "Message", $(".pub-msg").val(), 0);
-                }if ($(".pub-type").val() == "Input"){
-                    eel.create_pub(this.type, this.id, "Input", 0, $(".pub-input-type").val());
-                }
-            }
-        });
     }
 }
 
 //loads all permanent widgets from python
+wids = [];
 per_wids = eel.load_widgets("per")(function(pw){
     for(var i = 0; i < pw.length; i++){
-        wid = new SysWidPer(pw[i]);
-        console.log(wid.widTag);
-        console.log(wid.name);
-        wid.display(wid.name);
-        wid.delete_on_trash_click(wid.name);
-        wid.add_pubsub(wid.name);
+        wids[i] = new SysWidPer(pw[i], pw[i].name, pw[i].sub_type);
+        console.log(wids[i]);
+        wids[i].display(wids[i].name, wids[i].sub_type);
+        wids[i].delete_on_trash_click(wids[i].name);
     }
 });
 
+wids2 = [];
 temp_wids = eel.load_widgets("temp")(function(pw){
     for(var i = 0; i < pw.length; i++){
-        wid2 = new SysWidPer(pw[i]);
-        console.log(wid2.widTag);
-        console.log(wid2.name);
-        wid2.display(wid2.name);
-        wid2.delete_on_trash_click(wid2.name);
-        wid2.add_pubsub(wid2.name);
+        wids2[i] = new SysWidPer(pw[i]);
+        console.log(wids2[i].widTag);
+        console.log(wids2[i].name);
+        wids2[i].display(wids2[i].name, wids2[i].sub_type);
+        wids2[i].delete_on_trash_click(wids2[i].name);
     }
 });
 
-var newWid;
-var inputs = ["#widget-type", "#widget-name", "#widget-topic", "#widget-broker"];
 
 //gets triggered when new widgets are created
 function create_widget() {
     vals = [];
+    let inputs = ["#widget-type", "#widget-name", "#widget-topic", "#widget-broker", "#widget-sub-type"];
     console.log("Adding widget...");
     for(i = 0; i < inputs.length; i++){
-        var val = $(inputs[i]).val().replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        var val = $(inputs[i]).val();
         if (val.length > 1){
             vals.push(val);
         }else{
@@ -199,7 +200,9 @@ function create_widget() {
     var nameWid = vals[1];
     var topicWid = vals[2];
     var brokerWid = vals[3];
+    var subTypeWid = vals[4];
 
+    //character-limit for each input
     var char_limit = 30;
 
     if (nameWid.length > char_limit){
@@ -208,7 +211,7 @@ function create_widget() {
         return
     }else{
         console.log("Adding Widget!");
-        var newWid = new Widget(typeWid, nameWid, topicWid, brokerWid);
+        var newWid = new Widget(typeWid, nameWid, topicWid, brokerWid, subTypeWid);
         newWid.add();
     }
 }

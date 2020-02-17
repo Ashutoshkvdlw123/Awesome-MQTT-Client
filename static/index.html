@@ -28,53 +28,81 @@
             <i class="fa fa-plus"></i> Add Widget
         </div>
 
-    <div class="modal fade show" id="widgetInfoModal" tabindex="-1" role="dialog"
+    <div class="modal fade show wid-info" id="widgetInfoModal-pub" tabindex="-1" role="dialog"
       aria-labelledby="widgetInfoModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Widget - {widget_name}</h5>
+                    <h5 class="modal-title" id="modal-title-pubsub">Widget - {widget_name}</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span></button>
                 </div>
                 <div class="modal-body">
                     <form class="widgetInfo-form">
                         <div class="form-group">
-                            <label>Publisher</label>
-                            <select class="pub-choice">
-                                <option>OFF</option>
-                                <option>ON</option>
+                            <label>Type</label>
+                            <select class="form-control">
+                                <option>Publisher</option>
                             </select>
-                            <div class="form-group pub-type-group">
-                                <label>Type</label>
-                                <select class="pub-type">
-                                    <option>Message</option>
-                                    <option>Input</option>
-                                </select>
-                                <div class="form-group pub-msg-group">
-                                    <label>Message</label>
-                                    <input type="text" name="pub-msg" class="pub-msg">
-                                </div>
-                                <div class="form-group pub-input-group">
-                                    <label>Input-Type</label>
-                                    <select class="pub-input-type">
-                                        <option>Speech Recogniton</option>
-                                        <option>Custom Message</option>
-                                    </select>
-                                </div>
+                            <div class="form-group">
+                                <label>Broker</label>
+                                <input type="text" name="broker-setting" class="form-control" id="broker-setting-pub">
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Subscriber</label>
-                            <select class="subscriber-choice">
-                                <option>OFF</option>
-                                <option>ON</option>
-                            </select>
+                            <div class="form-group">
+                                <label>Topic</label>
+                                <input type="text" name="topic-setting" class="form-control" id="topic-setting-pub">
+                            </div>
+                            <div class="form-group">
+                                <label>Message</label>
+                                <input type="text" name="msg-pub" class="form-control" id="msg-pub">
+                            </div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary save-pubsub">Save changes</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal wid-info fade show" id="widgetInfoModal-sub" tabindex="-1" role="dialog"
+      aria-labelledby="widgetInfoModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modal-title-pubsub">Widget - {widget_name}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <form class="widgetInfo-form">
+                        <div class="form-group">
+                            <label>Type</label>
+                            <select class="form-control" id="Subscriber">
+                                <option>Subscriber</option>
+                            </select>
+                            <div class="form-group">
+                                <label>Broker</label>
+                                <input type="text" name="broker-setting-sub" class="form-control" id="broker-setting-sub">
+                            </div>
+                            <div class="form-group">
+                                <label>Topic</label>
+                                <input type="text" name="topic-setting-sub" class="form-control" id="topic-setting-sub">
+                            </div>
+                            <div class="form-group">
+                                <label>Notify Using</label>
+                                <select class="form-control" id="notify-type">
+                                    <option>System</option>
+                                    <option>Text to Speech</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary save-sub">Save changes</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -105,6 +133,13 @@
                 <div class="form-group">
                     <label>Widget Name</label>
                     <input type="text" name="widget-name" class="form-control" id="widget-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Sub-Type</label>
+                    <select class="form-control" id="widget-sub-type" required>
+                        <option value="Publisher">Publisher</option>
+                        <option value="Subscriber">Subscriber</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>Topic</label>

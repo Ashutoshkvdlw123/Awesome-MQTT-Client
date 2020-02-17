@@ -32,34 +32,22 @@ create_table_settings = """
 create_table_widgets = """
                 CREATE TABLE widgets (id INTEGER PRIMARY KEY AUTOINCREMENT,
                                       name TEXT,
+                                      sub_type TEXT,
                                       broker TEXT,
                                       topic TEXT);
                """
 
-create_table_wid_choices = """
-                CREATE TABLE wid_choices (id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                          wid_id INTEGER,
-                                          sub BOOLEAN,
-                                          pub BOOLEAN,
-                                          FOREIGN KEY(wid_id) REFERENCES widgets(id));
-               """
 create_table_pub_vals = """
                 CREATE TABLE pub_vals (id INTEGER PRIMARY KEY AUTOINCREMENT,
                                           wid_id INTEGER,
-                                          wid_choices_id INTEGER,
-                                          type TEXT,
                                           msg TEXT,
-                                          input_type TEXT,
-                                          FOREIGN KEY(wid_id) REFERENCES widgets(id),
-                                          FOREIGN KEY(wid_choices_id) REFERENCES wid_choices(id));
+                                          FOREIGN KEY(wid_id) REFERENCES widgets(id));
                """
 create_table_sub_vals = """
                 CREATE TABLE sub_vals (id INTEGER PRIMARY KEY AUTOINCREMENT,
                                           wid_id INTEGER,
-                                          wid_choices_id INTEGER,
-                                          type TEXT,
-                                          FOREIGN KEY(wid_id) REFERENCES widgets(id),
-                                          FOREIGN KEY(wid_choices_id) REFERENCES wid_choices(id));
+                                          type_notify TEXT,
+                                          FOREIGN KEY(wid_id) REFERENCES widgets(id));
                """
 
 if __name__ == "__main__":
@@ -88,7 +76,6 @@ if __name__ == "__main__":
   with conn:
     c.execute(create_table_settings)
     c.execute(create_table_widgets)
-    c.execute(create_table_wid_choices)
     c.execute(create_table_pub_vals)
     c.execute(create_table_sub_vals)
   date_installed = Setting("date-installed", now)

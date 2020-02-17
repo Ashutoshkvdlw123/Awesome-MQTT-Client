@@ -2,4 +2,5 @@ app.db
 __pycache__
 mqtt-client
 README.html
+.idea
 
